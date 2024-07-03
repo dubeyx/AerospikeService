@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        text-align: center;
+    }
+
+    h1 {
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .buttons button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 30%;
+    }
+
+    .buttons button:hover {
+        background: #0056b3;
+    }
+
+    #message {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #333;
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>User Management</h1>
+    <form id="userForm">
+        <div class="input-group">
+            <label for="userId">User ID</label>
+            <input type="text" id="userId" name="userId" required>
+        </div>
+        <div class="input-group">
+            <label for="userName">Name</label>
+            <input type="text" id="userName" name="userName" required>
+        </div>
+        <div class="input-group">
+            <label for="userAge">Age</label>
+            <input type="number" id="userAge" name="userAge" required>
+        </div>
+        <div class="buttons">
+            <button type="button" onclick="addUser()">Add User</button>
+            <button type="button" onclick="fetchUser()">Fetch User</button>
+            <button type="button" onclick="updateUser()">Update User</button>
+        </div>
+    </form>
+    <div id="message"></div>
+</div>
+<script>
+    const apiUrl = 'http://10.200.24.123:8080/api/users';
+
+function addUser() {
+    const userId = document.getElementById('userId').value;
+    const userName = document.getElementById('userName').value;
+    const userAge = document.getElementById('userAge').value;
+
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: userId, name: userName, age: userAge })
+    })
+    .then(response => response.text())
+    .then(data => displayMessage(data))
+    .catch(error => displayMessage('Error adding user: ' + error));
+}
+
+function fetchUser() {
+    const userId = document.getElementById('userId').value;
+
+    fetch(`${apiUrl}/${userId}`)
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('User not found');
+        }
+    })
+    .then(user => {
+        document.getElementById('userName').value = user.name;
+        document.getElementById('userAge').value = user.age;
+        displayMessage(`Fetched user with ID: ${userId}`);
+    })
+    .catch(error => displayMessage('Error fetching user: ' + error));
+}
+
+function updateUser() {
+    const userId = document.getElementById('userId').value;
+    const userName = document.getElementById('userName').value;
+    const userAge = document.getElementById('userAge').value;
+
+    fetch(`${apiUrl}/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: userId, name: userName, age: userAge })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.text();
+        } else {
+            throw new Error('User not found or error updating user');
+        }
+    })
+    .then(data => displayMessage(data))
+    .catch(error => displayMessage('Error updating user: ' + error));
+}
+
+function displayMessage(message) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = message;
+}
+
+</script>
+</body>
+</html>
